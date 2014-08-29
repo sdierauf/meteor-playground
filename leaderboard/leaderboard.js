@@ -5,7 +5,11 @@ Players = new Meteor.Collection("players");
 
 if (Meteor.isClient) {
   Template.leaderboard.players = function () {
-    return Players.find({}, {sort: {score: -1, name: 1}});
+    if (Session.equals("sort_method", "score")) {
+      return Players.find({}, {sort: {name: 1, score: -1}});
+    } else {
+      return Players.find({}, {sort: {score: -1, name: 1}});
+    }
   };
 
   Template.leaderboard.selected_name = function () {
@@ -20,6 +24,18 @@ if (Meteor.isClient) {
   Template.leaderboard.events({
     'click input.inc': function () {
       Players.update(Session.get("selected_player"), {$inc: {score: 5}});
+    }, 
+    'click input.toggle-sort': function() {
+      if (Session.equals("sort_method", "score")) {
+        Session.set("sort_method", "name");
+      } else {
+        Session.set("sort_method", "score")
+      }
+    },
+    'click input.new-points': function() {
+      Players.find().forEach(function(player) {
+        Players.update(player._id, {$set: {score: getRandomNiceScore()}});
+      });
     }
   });
 
@@ -41,7 +57,11 @@ if (Meteor.isServer) {
                    "Nikola Tesla",
                    "Claude Shannon"];
       for (var i = 0; i < names.length; i++)
-        Players.insert({name: names[i], score: Math.floor(Random.fraction()*10)*5});
+        Players.insert({name: names[i], score: getRandomNiceScore()});
     }
   });
+}
+
+function getRandomNiceScore() {
+  return Math.floor(Random.fraction()*10)*5;
 }

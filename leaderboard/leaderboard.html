@@ -9,6 +9,8 @@
 </body>
 
 <template name="leaderboard">
+  <input type="button" class="toggle-sort" value="Toggle sort" />
+  <input type="button" class="new-points" value="NEW POINTS!!" />
   <div class="leaderboard">
     {{#each players}}
       {{> player}}
